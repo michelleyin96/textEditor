@@ -4,9 +4,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Vector;
 
+import javax.swing.JTextArea;
+
 public class Server {
 	private Vector<ServerThread> serverThreads;
-	private Boolean serverOpen;
+	private volatile Boolean serverOpen;
 	private ServerSocket ss;
 	private int port;
 	
@@ -15,6 +17,7 @@ public class Server {
 		serverOpen = false;
 		this.port = port;
 		ss = null;
+		this.startServer();
 	}
 	
 	//Returns whether or not server is listening for incoming connections
@@ -27,40 +30,55 @@ public class Server {
 		serverOpen = bool;
 	}
 	
+	public int getPort() {
+		return port;
+	}
+	
 	//Allows server to listen for incoming connections
 	public void startServer() {
 		serverOpen = true;
-		try {
-			ss = new ServerSocket(port);
-			while (true) {
+		while(serverOpen) {
+			try {
+				ss = new ServerSocket(port);
 				System.out.println("waiting for connection...");
-				Socket s = ss.accept();
+				Socket s = ss.accept();					
 				System.out.println("connection from " + s.getInetAddress());
 				ServerThread st = new ServerThread(s, this);
 				serverThreads.add(st);
+			} catch (IOException e) {
+				System.out.println("ioe: " + e.getMessage());
+			} finally {
+				if (ss != null) {
+					try {
+						ss.close();
+					} catch (IOException ioe) {
+						System.out.println("ioe closing server socket: " + ioe.getMessage());
+					}
+				}
 			}
-		} catch (IOException e) {
-			System.out.println("ioe: " + e.getMessage());
 		}
 	}
 
-	//Stop all communication
+	/*Stop all communication
 	public void stopServer() {
-		serverOpen = false;
-		if (ss != null) {
-			try {
-				ss.close();
-			} catch (IOException ioe) {
-				System.out.println("ioe closing server socket: " + ioe.getMessage());
+		if (serverOpen) {
+			serverOpen = false;
+			if (ss != null) {
+				try {
+					ss.close();
+				} catch (IOException ioe) {
+					System.out.println("ioe closing server socket: " + ioe.getMessage());
+				}
 			}
 		}
-	}
+	}*/
 	
 	//Removes thread from server
 	public void removeServerThread(ServerThread st) {
 		serverThreads.remove(st);
 	}
-	
+
+
 	/*public void sendMessageToAllClients(ChatMessage message) {
 	for (ServerThread st : serverThreads) {
 		st.sendMessage(message);

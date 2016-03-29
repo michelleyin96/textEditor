@@ -31,18 +31,15 @@ public class ServerGUI extends JFrame {
 	private PanelButton startButton; 
 	private JScrollPane scrollPane; 
 	private JTextArea textArea;
-	//private Boolean stop; 
-	//private Boolean start;
-	//private Lock sLock;
-	//private Condition sCondition;
-	//private ServerSocket ss;
 	private Server server;
+	private Boolean serverIsOpen;
+	private Thread serverThread;
 	
 	public ServerGUI() {
 		super("Server");
 		
 		//initialize server
-		server = new Server(3649);
+		//server = new Server(3649);
 		
 		//create gui & functionality
 		initializeVariables();
@@ -63,7 +60,9 @@ public class ServerGUI extends JFrame {
 		textArea = new JTextArea();
 		textArea.setEditable(false);
 		scrollPane.getViewport().add(textArea);		
-		startButton = new PanelButton("start");
+		startButton = new PanelButton("Start");
+		
+		serverIsOpen = false;
 	}
 	
 	private void createGUI() {
@@ -78,22 +77,27 @@ public class ServerGUI extends JFrame {
 		class ServerGUIListener implements ActionListener {
 			public void actionPerformed(ActionEvent ae) {
 				//start the server if it's currently closed
-				if (!server.isOpen()) {
+				if (!serverIsOpen) {
+					serverIsOpen = true;
+					serverThread = new ServerListener();
+					serverThread.start();	
 					startButton.setText("Stop");
-					System.out.println("button started clicked");
-					ServerGUI.this.revalidate();
-					ServerGUI.this.repaint();
-					server.setOpen(true);
-					server.startServer();
+					//edit
+					textArea.append("Server Started on Port:" + 3649 + '\n');
+					textArea.revalidate();
+					textArea.repaint();					
+					return;
 				} 
 				//close server if it's open 
 				else {
-					startButton.setText("Stop");
+					serverIsOpen = false;
+					startButton.setText("Start");
+					System.out.println("button stopped");
+					textArea.append("Server stopped. \n");
 					ServerGUI.this.revalidate();
 					ServerGUI.this.repaint();
-					server.setOpen(false);
-					server.stopServer();
-					textArea.append("Server stopped \n");
+					serverThread.interrupt();
+					return;
 				}
 			}
 
