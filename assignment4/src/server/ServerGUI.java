@@ -33,7 +33,6 @@ public class ServerGUI extends JFrame {
 	private JTextArea textArea;
 	private Server server;
 	private Boolean serverIsOpen;
-	private Thread serverThread;
 	
 	public ServerGUI() {
 		super("Server");
@@ -45,6 +44,10 @@ public class ServerGUI extends JFrame {
 		initializeVariables();
 		createGUI();
 		addActionAdapters();
+	}
+	
+	public Boolean getOffline() {
+		return serverIsOpen;
 	}
 	
 	private void initializeVariables() {
@@ -62,6 +65,7 @@ public class ServerGUI extends JFrame {
 		scrollPane.getViewport().add(textArea);		
 		startButton = new PanelButton("Start");
 		
+		server = new Server(3649);
 		serverIsOpen = false;
 	}
 	
@@ -79,9 +83,8 @@ public class ServerGUI extends JFrame {
 				//start the server if it's currently closed
 				if (!serverIsOpen) {
 					serverIsOpen = true;
-					serverThread = new ServerListener();
-					serverThread.start();	
 					startButton.setText("Stop");
+					server.start();
 					//edit
 					textArea.append("Server Started on Port:" + 3649 + '\n');
 					textArea.revalidate();
@@ -92,11 +95,10 @@ public class ServerGUI extends JFrame {
 				else {
 					serverIsOpen = false;
 					startButton.setText("Start");
-					System.out.println("button stopped");
+					server.stopServer();
 					textArea.append("Server stopped. \n");
 					ServerGUI.this.revalidate();
 					ServerGUI.this.repaint();
-					serverThread.interrupt();
 					return;
 				}
 			}

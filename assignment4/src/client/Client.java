@@ -7,24 +7,18 @@ import java.net.Socket;
 public class Client extends Thread {
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
+	private Socket s;
 	
 	public Client(String hostname, int port) {
-		Socket s = null;
+		s = null;
 		try {
 			s = new Socket(hostname, port);
 			oos = new ObjectOutputStream(s.getOutputStream());
 			ois = new ObjectInputStream(s.getInputStream());
 			this.start();
 			
-			/*scan = new Scanner(System.in);
-			while(true) {
-				String line = scan.nextLine();
-				ChatMessage message = new ChatMessage("Prof. Miller", line);
-				oos.writeObject(message);
-				oos.flush();
-			}*/
 		} catch (IOException ioe) {
-			System.out.println("ioe: " + ioe.getMessage());
+			System.out.println("ioe1: " + ioe.getMessage());
 		} finally {
 			try {
 				if (s != null) {
@@ -34,12 +28,20 @@ public class Client extends Thread {
 					scan.close();
 				}*/
 			} catch (IOException ioe) {
-				System.out.println("ioe: " + ioe.getMessage());
+				System.out.println("ioe2: " + ioe.getMessage());
 			}
 		}
 	}
 	
+	public Boolean isSocketConnected() {
+		if (s != null) {
+			return s.isConnected();
+		}
+		return false;
+	}
+	
 	public void run() {
+		
 		/*try {
 			while(true) {
 				ChatMessage message = (ChatMessage)ois.readObject();
@@ -50,9 +52,5 @@ public class Client extends Thread {
 		} catch (IOException ioe) {
 			System.out.println("ioe: " + ioe.getMessage());
 		}*/
-	}
-	
-	public static void main(String [] args) {
-		new Client("localhost", 3649);
 	}
 }

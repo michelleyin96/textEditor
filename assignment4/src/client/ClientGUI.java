@@ -11,6 +11,8 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -24,29 +26,28 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import frame.LogoPanel;
+import server.ServerGUI;
 import spellcheck.PanelButton;
 import textdocument.TextDocumentManager;
 
 public class ClientGUI extends JFrame {
-	//private TextDocumentManager tdManager;
 	private LogoPanel logopanel;
 	private PanelButton loginButton, signupButton, offlineButton;
-	
+	private SignupGUI signupGUI;
+	private Client client;
+		
 	private static final long serialVersionUID = 1L;
 
-	{	
-		
-				
-		// credit to stackoverflow
+	//instance constructor
+	{			
 		//set custom cursor
 		getRootPane().setCursor(Toolkit.getDefaultToolkit().createCustomCursor(
 				new ImageIcon("img/icon/cursor.png").getImage(),
 				new Point(0,0),"custom cursor"));
 
-		//set title and size
+		//set title, size, background
 		setTitle("Trojan Office");
 		setSize(640,480);
-		
 		setBackground(Color.gray);
 		
 		//set layout manager
@@ -98,23 +99,46 @@ public class ClientGUI extends JFrame {
 		c.insets = new Insets(0,20,60,20); 
 		getContentPane().add(offlineButton, c);
 		
+		//initialize other frames
+		initializeOtherFrames();
+		
+		//add action listeners 
+		addActionListeners();
 		
 		revalidate();
-		repaint();
-
-		
+		repaint();	
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);		
 		setVisible(true);		
 	}
 	
+	private void initializeOtherFrames() {
+		client = null;
+		signupGUI = new SignupGUI();
+		signupGUI.setVisible(false);
+	}
+	
+	private void addActionListeners() {
+		class SignupListener implements ActionListener {
+			public void actionPerformed(ActionEvent ae) {
+				if (client == null) {
+					client = new Client("localhost", 3649);
+					signupGUI.setClient(client);
+				}
+				ClientGUI.this.setVisible(false);
+				signupGUI.setVisible(true);
+			}
+		}
+		signupButton.addActionListener(new SignupListener());
+	}
+		
+	/* ========== main function =================== */
 	public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		try{//Set the UI to cross platform for better portability
 			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
 		} catch(Exception e){
 			System.out.println("Warning! Cross-platform L&F not used!");
 		} finally {
-			/*Not necessary for Assignment 2 - but this is good practice*/
 			SwingUtilities.invokeLater(() -> { new ClientGUI().setVisible(true); });
 		}
 		

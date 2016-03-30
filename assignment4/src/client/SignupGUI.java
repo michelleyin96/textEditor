@@ -37,13 +37,14 @@ import frame.LogoPanel;
 import spellcheck.PanelButton;
 
 public class SignupGUI extends JFrame {
-	//private TextDocumentManager tdManager;
 	private LogoPanel logopanel;
 	private JLabel username, password, repeat;
 	private JTextField userField; 
 	private JPasswordField passwordField, repeatField;
 	private PanelButton loginButton; 
 	private JPanel fieldContainer, bottomPanel;
+	private Client client;
+	
 	
 	private static final long serialVersionUID = 1L;
 
@@ -70,6 +71,10 @@ public class SignupGUI extends JFrame {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);		
 		setVisible(true);		
+	}
+	
+	public void setClient(Client client) {
+		this.client = client;
 	}
 	
 	private void initializeVariables() {
@@ -147,21 +152,24 @@ public class SignupGUI extends JFrame {
 	
 	public void addActionListeners() {
 		loginButton.addActionListener(new ActionListener(){
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				char[] password = passwordField.getPassword();
 				char[] repeat = repeatField.getPassword();
 				checkPasswordValidity(password);
 				checkRepeatValidity(password,repeat);
-
+				checkOffline();
 			}
 			
 		});
 	}
 	
-	private void writeToDatabase() {
-		
+	private void checkOffline() {
+		if (!client.isSocketConnected()) {
+			JOptionPane.showMessageDialog(SignupGUI.this, 
+					"Server cannot be reached in. Program in Offline Mode.", 
+					"Sign-up Failed", JOptionPane.WARNING_MESSAGE);
+		}
 	}
 	
 	private void checkRepeatValidity(char[] password, char[] repeat) {
@@ -198,31 +206,5 @@ public class SignupGUI extends JFrame {
 				"Password Must Contain at least: \n 1-number 1-uppercase letter", 
 				"Sign-up Failed", JOptionPane.WARNING_MESSAGE);
 		}
-	}
-	
-	public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		try{//Set the UI to cross platform for better portability
-			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-		} catch(Exception e){
-			System.out.println("Warning! Cross-platform L&F not used!");
-		} finally {
-			/*Not necessary for Assignment 2 - but this is good practice*/
-			SwingUtilities.invokeLater(() -> { new SignupGUI().setVisible(true); });
-		}
-		
-		//set dock image 
-		Image dockImage = null;
-		try {
-			dockImage = ImageIO.read(new File("img/icon/office.png"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
-		Method getApplicationMethod = applicationClass.getMethod("getApplication");
-		Method setDockIconMethod = applicationClass.getMethod("setDockIconImage", java.awt.Image.class);
-		Object macOSXApplication = getApplicationMethod.invoke(null);
-		setDockIconMethod.invoke(macOSXApplication, dockImage);
 	}
 }

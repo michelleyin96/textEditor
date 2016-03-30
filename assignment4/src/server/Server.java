@@ -6,7 +6,7 @@ import java.util.Vector;
 
 import javax.swing.JTextArea;
 
-public class Server {
+public class Server extends Thread {
 	private Vector<ServerThread> serverThreads;
 	private volatile Boolean serverOpen;
 	private ServerSocket ss;
@@ -17,7 +17,6 @@ public class Server {
 		serverOpen = false;
 		this.port = port;
 		ss = null;
-		this.startServer();
 	}
 	
 	//Returns whether or not server is listening for incoming connections
@@ -48,18 +47,21 @@ public class Server {
 			} catch (IOException e) {
 				System.out.println("ioe: " + e.getMessage());
 			} finally {
-				if (ss != null) {
-					try {
-						ss.close();
-					} catch (IOException ioe) {
-						System.out.println("ioe closing server socket: " + ioe.getMessage());
+				if (serverOpen) {
+					serverOpen = false;
+					if (ss != null) {
+						try {
+							ss.close();
+						} catch (IOException ioe) {
+							System.out.println("ioe closing server socket: " + ioe.getMessage());
+						}
 					}
 				}
 			}
-		}
+		} 
 	}
 
-	/*Stop all communication
+	//Stop all communication
 	public void stopServer() {
 		if (serverOpen) {
 			serverOpen = false;
@@ -71,18 +73,16 @@ public class Server {
 				}
 			}
 		}
-	}*/
+	}
 	
 	//Removes thread from server
 	public void removeServerThread(ServerThread st) {
 		serverThreads.remove(st);
 	}
 
-
-	/*public void sendMessageToAllClients(ChatMessage message) {
-	for (ServerThread st : serverThreads) {
-		st.sendMessage(message);
+	
+	@Override public void run() {
+		this.startServer();
 	}
-}*/
-
 }
+
