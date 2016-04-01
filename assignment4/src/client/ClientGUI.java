@@ -26,6 +26,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import frame.LogoPanel;
+import frame.OfficeFrame;
 import server.ServerGUI;
 import spellcheck.PanelButton;
 import textdocument.TextDocumentManager;
@@ -34,7 +35,9 @@ public class ClientGUI extends JFrame {
 	private LogoPanel logopanel;
 	private PanelButton loginButton, signupButton, offlineButton;
 	private SignupGUI signupGUI;
+	private LoginGUI loginGUI;
 	private Client client;
+	private OfficeFrame officeFrame;
 		
 	private static final long serialVersionUID = 1L;
 
@@ -114,6 +117,8 @@ public class ClientGUI extends JFrame {
 	
 	private void initializeOtherFrames() {
 		client = null;
+		loginGUI = new LoginGUI();
+		loginGUI.setVisible(false);
 		signupGUI = new SignupGUI();
 		signupGUI.setVisible(false);
 	}
@@ -121,16 +126,30 @@ public class ClientGUI extends JFrame {
 	private void addActionListeners() {
 		class SignupListener implements ActionListener {
 			public void actionPerformed(ActionEvent ae) {
-				if (client == null) {
-					client = new Client("localhost", 3649);
-					signupGUI.setClient(client);
-				}
 				ClientGUI.this.setVisible(false);
 				signupGUI.setVisible(true);
 			}
 		}
 		signupButton.addActionListener(new SignupListener());
+		
+		loginButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ClientGUI.this.setVisible(false);
+				loginGUI.setVisible(true);
+			}
+			
+		});
+		offlineButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ClientGUI.this.setVisible(false);
+				new OfficeFrame().setVisible(true);
+			}			
+		});
 	}
+	
 		
 	/* ========== main function =================== */
 	public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {

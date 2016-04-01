@@ -5,11 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -20,11 +17,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.imageio.ImageIO;
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -40,11 +35,11 @@ import user.Encrypt;
 import user.Password;
 import user.User;
 
-public class SignupGUI extends JFrame {
+public class LoginGUI extends JFrame{
 	private LogoPanel logopanel;
 	private JLabel username, password, repeat;
 	private JTextField userField; 
-	private JPasswordField passwordField, repeatField;
+	private JPasswordField passwordField;
 	private PanelButton loginButton; 
 	private JPanel fieldContainer, bottomPanel;
 	private Client client;
@@ -94,8 +89,6 @@ public class SignupGUI extends JFrame {
 		userField.setPreferredSize(new Dimension(this.getWidth(), 20));
 		passwordField = new JPasswordField();
 		passwordField.setPreferredSize(new Dimension(this.getWidth(), 20));
-		repeatField = new JPasswordField();
-		repeatField.setPreferredSize(new Dimension(this.getWidth(), 20));
 		loginButton = new PanelButton("login");
 		loginButton.setPreferredSize(new Dimension(100, 30));
 		fieldContainer = new JPanel();
@@ -119,8 +112,6 @@ public class SignupGUI extends JFrame {
 		userField.setFont(customFont);
 		password.setFont(customFont);
 		passwordField.setFont(customFont);
-		repeat.setFont(customFont);
-		repeatField.setFont(customFont);
 		loginButton.setFont(customFont);
 		UIManager.put("OptionPane.messageFont", customFont);
 		UIManager.put("OptionPane.buttonFont", customFont);
@@ -133,18 +124,16 @@ public class SignupGUI extends JFrame {
 		//add logo
 		getContentPane().add(logopanel);
 		
-		GridLayout fieldsLayout = new GridLayout(3,2);
+		GridLayout fieldsLayout = new GridLayout(2,2);
 		fieldsLayout.setVgap(10);
 		fieldsLayout.setHgap(10);
 		fieldContainer.setLayout(fieldsLayout);
 		fieldContainer.setBackground(Color.gray);
-		fieldContainer.setBorder(new EmptyBorder(10, 50, 10, 200));
+		fieldContainer.setBorder(new EmptyBorder(40, 50, 40, 200));
 		fieldContainer.add(username);
 		fieldContainer.add(userField);
 		fieldContainer.add(password);
 		fieldContainer.add(passwordField);
-		fieldContainer.add(repeat);
-		fieldContainer.add(repeatField);
 		getContentPane().add(fieldContainer);
 		
 		bottomPanel.setLayout(new BorderLayout());
@@ -155,23 +144,26 @@ public class SignupGUI extends JFrame {
 		
 	}
 	
+	public void openMainFrame() {
+		this.setVisible(false);
+		officeFrame = new OfficeFrame();
+		officeFrame.setVisible(true);
+	}
+	
+	
 	public void addActionListeners() {
 		loginButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String username = userField.getText();
 				char[] password = passwordField.getPassword();
-				char[] repeat = repeatField.getPassword();
-				checkPasswordValidity(password);
-				checkRepeatValidity(password,repeat);
-				//checkOffline();
-				
+
 				//encrypt password and make user obj
 				User user = null;
 				try {
 					String encryptedPass = Encrypt.encryptPassword(password.toString());
-					user = new User(username, encryptedPass, true);
-					new SignupClient("localhost", 3649, user, SignupGUI.this);					
+					user = new User(username, encryptedPass, false);
+					new LoginClient("localhost", 3649, user, LoginGUI.this);
 				} catch (Exception err) {
 					System.out.println("err: " + err.getMessage());
 				}
@@ -179,56 +171,5 @@ public class SignupGUI extends JFrame {
 			}
 			
 		});
-	}
-	
-	
-	public void openMainFrame() {
-		this.setVisible(false);
-		officeFrame = new OfficeFrame();
-		officeFrame.setVisible(true);
-	}
-	
-	private void checkOffline() {
-		if (!client.isSocketConnected()) {
-			JOptionPane.showMessageDialog(SignupGUI.this, 
-					"Server cannot be reached in. Program in Offline Mode.", 
-					"Sign-up Failed", JOptionPane.WARNING_MESSAGE);
-		}
-	}
-	
-	private void checkRepeatValidity(char[] password, char[] repeat) {
-		if (password.length != repeat.length) {
-			JOptionPane.showMessageDialog(SignupGUI.this, 
-					"Passwords do not match", 
-					"Sign-up Failed", JOptionPane.WARNING_MESSAGE);
-			return;
-		}
-		for (int i=0; i<password.length; i++) {
-			if (password[i] != repeat[i]) {
-				JOptionPane.showMessageDialog(SignupGUI.this, 
-						"Passwords do not match", 
-						"Sign-up Failed", JOptionPane.WARNING_MESSAGE);
-				return;
-			}
-		}
-	}
-	
-	private void checkPasswordValidity(char[] password) {
-		int upperCount = 0;
-		int numCount = 0;
-		for (int i=0; i < password.length; i++) {
-			Character ch = password[i];
-			if (Character.isDigit(ch)) {
-				numCount++;
-			}
-			if ((Character.isUpperCase(ch))) {
-				upperCount++;
-			}
-		}
-		if (numCount < 1 || upperCount < 1) {
-			JOptionPane.showMessageDialog(SignupGUI.this, 
-				"Password Must Contain at least: \n 1-number 1-uppercase letter", 
-				"Sign-up Failed", JOptionPane.WARNING_MESSAGE);
-		}
 	}
 }

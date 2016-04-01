@@ -49,4 +49,13 @@ public class Password {
         );
         return Base64.encodeBase64String(key.getEncoded());
     }
+    
+    /*by Michelle Yin 
+    private static String sendPassEncrypt(String pwd) {
+    	pwd
+    	for (int i=1; i < pwd.length(); i++) {
+    		
+    		pwd.charAt(i) = pwd.charAt(i-1);
+    	}
+    }*/
 }

@@ -35,8 +35,7 @@ public class Server extends Thread {
 	
 	//Allows server to listen for incoming connections
 	public void startServer() {
-		serverOpen = true;
-		while(serverOpen) {
+		while(true) {
 			try {
 				ss = new ServerSocket(port);
 				System.out.println("waiting for connection...");
@@ -47,32 +46,33 @@ public class Server extends Thread {
 			} catch (IOException e) {
 				System.out.println("ioe: " + e.getMessage());
 			} finally {
-				if (serverOpen) {
-					serverOpen = false;
-					if (ss != null) {
-						try {
-							ss.close();
-						} catch (IOException ioe) {
-							System.out.println("ioe closing server socket: " + ioe.getMessage());
-						}
+				if (ss != null) {
+					try {
+						ss.close();
+					} catch (IOException ioe) {
+						System.out.println("ioe closing server socket: " + ioe.getMessage());
 					}
 				}
+				
 			}
 		} 
 	}
 
 	//Stop all communication
 	public void stopServer() {
-		if (serverOpen) {
-			serverOpen = false;
-			if (ss != null) {
-				try {
-					ss.close();
-				} catch (IOException ioe) {
-					System.out.println("ioe closing server socket: " + ioe.getMessage());
-				}
+		if (ss != null) {
+			try {
+				ss.close();
+			} catch (IOException ioe) {
+				System.out.println("ioe closing server socket: " + ioe.getMessage());
 			}
 		}
+		
+	}
+	
+	//Send validation to user client
+	public void sendValidationToClient(ServerThread st, Boolean valid) {
+		st.sendLogin(valid);
 	}
 	
 	//Removes thread from server
